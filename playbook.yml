@@ -18,7 +18,7 @@
 
     - name: download CodeIgniter
       get_url: url=https://codeload.github.com/bcit-ci/CodeIgniter/zip/3.0.4 dest=/usr/share/nginx/html/CodeIgniter-3.0.4.zip
-      changed_when: False
+      when: result|failed
 
     - name: install unzip
       yum: name=unzip
