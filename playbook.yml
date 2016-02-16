@@ -50,7 +50,10 @@
       service: name=mysqld state=restarted
       changed_when: False
 
-    - name: install repo
+    - name: install epel repo
+      yum: name=epel-release
+
+    - name: install remi repo
       yum: name=http://rpms.famillecollet.com/enterprise/remi-release-7.rpm
       ignore_errors: yes
 
