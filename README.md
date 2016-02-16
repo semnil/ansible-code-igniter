@@ -5,5 +5,4 @@ an ansible playbook include CodeIgniter, nginx, php and MySQL.
 The Vagrant is required.
 ```
 vagrant up
-
 ```
