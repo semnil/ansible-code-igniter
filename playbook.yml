@@ -50,14 +50,16 @@
       service: name=mysqld state=restarted
       changed_when: False
 
+    - name: install repo
+      yum: name=http://rpms.famillecollet.com/enterprise/remi-release-7.rpm
+      ignore_errors: yes
+
     - name: install php
-      yum: name=php
-
-    - name: install php-fpm
-      yum: name=php-fpm
-
-    - name: install php-mysql
-      yum: name=php-mysql
+      yum: name=php enablerepo=remi-php56
+    - yum: name=php-fpm enablerepo=remi-php56
+    - yum: name=php-mbstring enablerepo=remi-php56
+    - yum: name=php-mcrypt enablerepo=remi-php56
+    - yum: name=php-mysqlnd enablerepo=remi-php56
 
     - name: edit php-fpm conf
       lineinfile: dest=/etc/php-fpm.d/www.conf regexp="^listen = " line="listen = /var/run/php-fpm/php-fpm.sock"
