@@ -1,0 +1,79 @@
+---
+- hosts: all
+  sudo: true
+  user: vagrant
+  tasks:
+    - name: install repo
+      yum: name=http://nginx.org/packages/centos/7/noarch/RPMS/nginx-release-centos-7-0.el7.ngx.noarch.rpm
+      ignore_errors: yes
+
+    - name: install nginx
+      yum: name=nginx
+
+    - name: check CodeIgniter
+      shell: ls -l /usr/share/nginx/html/index.php
+      register: result
+      ignore_errors: True
+      changed_when: False
+
+    - name: download CodeIgniter
+      get_url: url=https://codeload.github.com/bcit-ci/CodeIgniter/zip/3.0.4 dest=/usr/share/nginx/html/CodeIgniter-3.0.4.zip
+      changed_when: False
+
+    - name: install unzip
+      yum: name=unzip
+
+    - name: install CodeIgniter
+      shell: |
+        unzip CodeIgniter-3.0.4.zip
+        mv CodeIgniter-3.0.4/* .
+        rm -rf CodeIgniter-3.0.4*
+      args:
+        chdir: /usr/share/nginx/html/
+      when: result|failed
+
+    - name: copy nginx conf
+      copy: src=./default.conf dest=/etc/nginx/conf.d/default.conf owner=root group=root mode=0644
+
+    - name: start nginx
+      service: name=nginx state=restarted
+      changed_when: False
+
+    - name: install repo
+      yum: name=http://dev.mysql.com/get/mysql57-community-release-el7-7.noarch.rpm
+      ignore_errors: yes
+
+    - name: install mysql
+      yum: name=mysql-community-server
+
+    - name: start mysql
+      service: name=mysqld state=restarted
+      changed_when: False
+
+    - name: install php
+      yum: name=php
+
+    - name: install php-fpm
+      yum: name=php-fpm
+
+    - name: install php-mysql
+      yum: name=php-mysql
+
+    - name: edit php-fpm conf
+      lineinfile: dest=/etc/php-fpm.d/www.conf regexp="^listen = " line="listen = /var/run/php-fpm/php-fpm.sock"
+
+    - name: edit php-fpm conf
+      lineinfile: dest=/etc/php-fpm.d/www.conf regexp="^;?listen.owner = " line="listen.owner = nginx"
+
+    - name: edit php-fpm conf
+      lineinfile: dest=/etc/php-fpm.d/www.conf regexp="^;?listen.group = " line="listen.group = nginx"
+
+    - name: edit php-fpm conf
+      lineinfile: dest=/etc/php-fpm.d/www.conf regexp="^user = " line="user = nginx"
+
+    - name: edit php-fpm conf
+      lineinfile: dest=/etc/php-fpm.d/www.conf regexp="^group = " line="group = nginx"
+
+    - name: start php-fpm
+      service: name=php-fpm state=restarted
+      changed_when: False
